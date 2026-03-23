@@ -78,7 +78,6 @@ export function HeroSection() {
           src={heroVideo}
           muted
           playsInline
-          autoPlay
           preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ pointerEvents: 'none' }}

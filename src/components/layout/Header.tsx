@@ -82,7 +82,7 @@ export function Header() {
           items={mobileMenuItems}
           socialItems={[]}
           displaySocials={false}
-          displayItemNumbering={true}
+          displayItemNumbering={false}
           menuButtonColor="#ffffff"
           openMenuButtonColor="#fff"
           changeMenuColorOnOpen={true}
