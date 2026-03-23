@@ -39,7 +39,7 @@ export function Header() {
               className="flex flex-col pointer-events-auto transition-all duration-300 hover:-translate-y-0.5"
             >
               <span className="text-sm font-semibold tracking-tight text-foreground leading-none">Norfront Group</span>
-              <span className="text-[10px] text-muted-foreground tracking-widest uppercase mt-0.5">AI Advisory</span>
+              <span className="hidden md:block text-[10px] text-muted-foreground tracking-widest uppercase mt-0.5">AI Advisory</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -89,6 +89,7 @@ export function Header() {
           colors={['#1a2332', '#243447']}
           accentColor="#7ec8e3"
           isFixed={true}
+          logoText="Norfront Group"
           onItemClick={handleMobileItemClick}
         />
       </div>

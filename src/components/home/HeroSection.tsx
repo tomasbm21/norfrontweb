@@ -17,8 +17,15 @@ export function HeroSection() {
     video.pause();
 
     const onLoaded = () => {
-      setVideoReady(true);
-      video.currentTime = 0;
+      // iOS requires a play/pause cycle before currentTime can be set
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0;
+        setVideoReady(true);
+      }).catch(() => {
+        video.currentTime = 0;
+        setVideoReady(true);
+      });
     };
 
     video.addEventListener('loadedmetadata', onLoaded);
@@ -71,6 +78,7 @@ export function HeroSection() {
           src={heroVideo}
           muted
           playsInline
+          autoPlay
           preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ pointerEvents: 'none' }}
@@ -102,14 +110,14 @@ export function HeroSection() {
 
               {/* Mobile buttons */}
               <div className="flex md:hidden flex-col items-center gap-3 animate-fade-in-delay-3 px-4">
-                <BorderGlow borderRadius={0} glowRadius={20} glowColor="200 60 85" backgroundColor="rgba(255,255,255,0.95)" colors={['#7ec8e3','#a8d8ea','#c9e4f0']} fillOpacity={0.15} className="w-full max-w-[85%]">
-                  <Link to="/contact" className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium text-[#1a2332] w-full">
+                <BorderGlow borderRadius={8} glowRadius={20} glowColor="200 60 85" backgroundColor="rgba(255,255,255,0.95)" colors={['#7ec8e3','#a8d8ea','#c9e4f0']} fillOpacity={0.15} className="w-full max-w-[85%]">
+                  <Link to="/contact" className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium text-[#1a2332] w-full rounded-lg">
                     Talk to Us
                     <ArrowRight size={16} />
                   </Link>
                 </BorderGlow>
-                <BorderGlow borderRadius={0} glowRadius={20} glowColor="200 60 85" backgroundColor="hsl(215, 25%, 12%)" colors={['#7ec8e3','#a8d8ea','#c9e4f0']} fillOpacity={0.08} className="w-full max-w-[85%]">
-                  <Link to="/case-studies" className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white w-full">
+                <BorderGlow borderRadius={8} glowRadius={20} glowColor="200 60 85" backgroundColor="hsl(215, 25%, 12%)" colors={['#7ec8e3','#a8d8ea','#c9e4f0']} fillOpacity={0.08} className="w-full max-w-[85%]">
+                  <Link to="/case-studies" className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white w-full rounded-lg">
                     See It In Action
                   </Link>
                 </BorderGlow>

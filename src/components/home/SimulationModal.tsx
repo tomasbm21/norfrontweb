@@ -77,7 +77,7 @@ export function SimulationModal({ simulation, onClose }: SimulationModalProps) {
                     isDone
                       ? 'border-[#7ec8e3]/50 text-[#7ec8e3]/70 bg-[#7ec8e3]/10'
                       : isActive
-                      ? 'border-[#7ec8e3] text-[#7ec8e3] bg-[#7ec8e3]/10'
+                      ? 'border-[#7ec8e3] text-[#0d1117] bg-[#7ec8e3]'
                       : 'border-white/15 text-white/25'
                   }`}>
                     {isDone ? '✓' : i + 1}
