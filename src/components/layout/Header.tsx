@@ -33,10 +33,10 @@ export function Header() {
       <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <nav className="container mx-auto px-5 sm:px-6 lg:px-8 py-4 md:py-5">
           <div className="flex items-center justify-between">
-            {/* Logo */}
+            {/* Logo — hidden on mobile (StaggeredMenu shows its own logo) */}
             <Link
               to="/"
-              className="flex flex-col pointer-events-auto transition-all duration-300 hover:-translate-y-0.5"
+              className="hidden md:flex flex-col pointer-events-auto transition-all duration-300 hover:-translate-y-0.5"
             >
               <span className="text-sm font-semibold tracking-tight text-foreground leading-none">Norfront Group</span>
               <span className="hidden md:block text-[10px] text-muted-foreground tracking-widest uppercase mt-0.5">AI Advisory</span>
