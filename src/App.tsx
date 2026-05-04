@@ -13,7 +13,6 @@ function ScrollToTop() {
 import Index from "./pages/Index";
 import Model from "./pages/Model";
 import Services from "./pages/Services";
-import CaseStudies from "./pages/CaseStudies";
 import Engagements from "./pages/Engagements";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -21,6 +20,7 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import Jobs from "./pages/Jobs";
 import Partners from "./pages/Partners";
+import Jarvis from "./pages/Jarvis";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +40,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/partners" element={<Partners />} />
+          <Route path="/jarvis" element={<Jarvis />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />

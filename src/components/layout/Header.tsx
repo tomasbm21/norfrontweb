@@ -3,11 +3,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import BorderGlow from "@/components/BorderGlow";
 import StaggeredMenu from "@/components/StaggeredMenu";
-import { Home, Briefcase, FolderKanban, Award, Users, Handshake } from "lucide-react";
+import { Home, Briefcase, FolderKanban, Award, Users, Handshake, Mic } from "lucide-react";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Our Model", href: "/model", icon: Briefcase },
+  { name: "Jarvis", href: "/jarvis", icon: Mic },
   { name: "Case Studies", href: "/case-studies", icon: FolderKanban },
   { name: "How We Work", href: "/services", icon: Award },
   { name: "Portfolio", href: "/partners", icon: Handshake },

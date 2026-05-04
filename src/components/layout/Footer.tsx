@@ -26,6 +26,7 @@ export function Footer() {
             <span className="text-[10px] font-semibold tracking-[0.16em] uppercase text-muted-foreground/40 block mb-4">Work With Us</span>
             <nav className="flex flex-col gap-2.5">
               <Link to="/services" className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors">How We Work</Link>
+              <Link to="/jarvis" className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors">Jarvis (voice)</Link>
               <Link to="/contact" className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors">Contact</Link>
               <Link to="/jobs" className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors">Careers</Link>
             </nav>
