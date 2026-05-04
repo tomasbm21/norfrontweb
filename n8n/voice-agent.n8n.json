@@ -1,0 +1,182 @@
+{
+  "name": "Voice Agent",
+  "meta": {
+    "instanceId": "norfront-export"
+  },
+  "nodes": [
+    {
+      "id": "af975859-41d6-4ba8-b387-fa5c0c01f50f",
+      "name": "Norfront Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 400],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "norfront-voice-agent",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "binaryData": true
+        }
+      }
+    },
+    {
+      "id": "b03be0d6-1c73-467a-b66c-042950d9f7fd",
+      "name": "Text or voice",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [480, 400],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "t1",
+              "leftValue": "={{ $json.body && $json.body.channel ? $json.body.channel : ($json.channel || '') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "text"
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "14965676-31e1-4164-956b-e1cec48e5bd8",
+      "name": "Echo text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 260],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "replyText",
+              "value": "={{ \"Norfront: \" + String($json.body?.message ?? $json.message ?? \"\") }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "8a3c6b1f-5138-4f60-9624-ba3cff250e3b",
+      "name": "Voice stub",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 520],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "replyText",
+              "value": "Voice received. Add STT (e.g. ElevenLabs or Whisper) before this branch, then your agent + TTS.",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "407a907d-bced-44b8-9fe0-e235629e4d4f",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [960, 400],
+      "parameters": {
+        "mode": "append"
+      }
+    },
+    {
+      "id": "0088cebc-3ce0-4ef8-b6a5-e084c299f3b9",
+      "name": "Respond JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1200, 400],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ replyText: $json.replyText }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Norfront Webhook": {
+      "main": [
+        [
+          {
+            "node": "Text or voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text or voice": {
+      "main": [
+        [
+          {
+            "node": "Echo text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Voice stub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Echo text": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice stub": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Respond JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
