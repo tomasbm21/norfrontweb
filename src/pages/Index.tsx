@@ -7,6 +7,7 @@ import { ServicesOverview } from "@/components/home/ServicesOverview";
 import { Differentiation } from "@/components/home/Differentiation";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { PreviewSimulations } from "@/components/home/PreviewSimulations";
+import { FloatingJarvis } from "@/components/voice/FloatingJarvis";
 
 const Index = () => {
   return (
@@ -19,6 +20,7 @@ const Index = () => {
       <Differentiation />
       <IntegrationsSection />
       <FinalCTA />
+      <FloatingJarvis />
     </Layout>
   );
 };

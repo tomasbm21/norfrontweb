@@ -14,11 +14,21 @@ import { Loader2, Mic, Send } from "lucide-react";
 
 type Phase = "idle" | "mic_prompt" | "recording" | "uploading" | "playing";
 
-export function JarvisVoiceAssistant() {
+export interface JarvisVoiceAssistantProps {
+  /** Full /jarvis page vs floating widget */
+  variant?: "page" | "compact";
+  /** Initial speech-bubble copy (e.g. matches greeting TTS) */
+  initialBubbleText?: string;
+}
+
+export function JarvisVoiceAssistant({
+  variant = "page",
+  initialBubbleText = "Hello!",
+}: JarvisVoiceAssistantProps) {
   const { toast } = useToast();
   const webhookUrl = getVoiceWebhookUrl();
   const [phase, setPhase] = useState<Phase>("idle");
-  const [bubbleText, setBubbleText] = useState("Hello!");
+  const [bubbleText, setBubbleText] = useState(initialBubbleText);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const streamRef = useRef<MediaStream | null>(null);
@@ -111,7 +121,7 @@ export function JarvisVoiceAssistant() {
     if (blob.size < 64) {
       toast({ title: "Nothing recorded", description: "Hold the orb a little longer." });
       setPhase("idle");
-      setBubbleText("Hello!");
+      setBubbleText(initialBubbleText);
       return;
     }
 
@@ -143,7 +153,7 @@ export function JarvisVoiceAssistant() {
     } finally {
       setPhase("idle");
     }
-  }, [stopStream, toast, webhookUrl]);
+  }, [stopStream, toast, webhookUrl, initialBubbleText]);
 
   const toggleOrb = useCallback(() => {
     if (phase === "uploading" || phase === "playing") return;
@@ -193,27 +203,51 @@ export function JarvisVoiceAssistant() {
     }
   }, [chatInput, toast, webhookUrl]);
 
+  const isCompact = variant === "compact";
   const orbActive = phase === "recording" || phase === "uploading" || phase === "playing";
 
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-16 md:py-24 max-w-lg mx-auto text-center">
-      <p className="text-sm font-sans text-[#b8a8e8] tracking-wide mb-6">New Update</p>
+    <div
+      className={cn(
+        "flex flex-col items-center text-center",
+        isCompact ? "max-w-full px-1 py-2" : "max-w-lg mx-auto justify-center px-4 py-16 md:py-24"
+      )}
+    >
+      {!isCompact && (
+        <p className="text-sm font-sans text-[#b8a8e8] tracking-wide mb-6">New Update</p>
+      )}
 
-      <div className="relative inline-block mb-14 md:mb-16">
-        <div className="rounded-2xl border border-white px-6 py-3 font-mono text-base md:text-lg font-bold tracking-tight text-white">
+      <div className={cn("relative inline-block", isCompact ? "mb-10 scale-[0.92]" : "mb-14 md:mb-16")}>
+        <div
+          className={cn(
+            "rounded-2xl border border-white font-mono font-bold tracking-tight text-white",
+            isCompact ? "px-4 py-2 text-sm" : "px-6 py-3 text-base md:text-lg"
+          )}
+        >
           <span className="text-[#c4b5fd]">AI</span> Voice Assistant
         </div>
         <div className="absolute right-4 top-[calc(100%-2px)] flex flex-col items-end pointer-events-none">
           <div className="w-0 h-0 mr-7 border-x-[8px] border-x-transparent border-b-[10px] border-b-white" aria-hidden />
-          <div className="bg-white rounded-lg rounded-tr-sm px-3 py-2 shadow-md max-w-[min(260px,80vw)]">
-            <span className="text-sm font-sans font-semibold text-[#ff3d8a] leading-snug break-words" aria-live="polite">
+          <div
+            className={cn(
+              "bg-white rounded-lg rounded-tr-sm shadow-md max-w-[min(260px,80vw)]",
+              isCompact ? "px-2.5 py-1.5" : "px-3 py-2"
+            )}
+          >
+            <span
+              className={cn(
+                "font-sans font-semibold text-[#ff3d8a] leading-snug break-words",
+                isCompact ? "text-xs" : "text-sm"
+              )}
+              aria-live="polite"
+            >
               {bubbleText}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="relative mt-4 flex flex-col items-center">
+      <div className={cn("relative flex flex-col items-center", isCompact ? "mt-1" : "mt-4")}>
         <div
           className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[min(280px,70vw)] h-10 rounded-[100%] bg-[#7c3aed]/25 blur-2xl pointer-events-none"
           aria-hidden
@@ -224,7 +258,8 @@ export function JarvisVoiceAssistant() {
           onClick={toggleOrb}
           disabled={phase === "uploading" || phase === "playing"}
           className={cn(
-            "relative z-10 flex h-44 w-44 md:h-52 md:w-52 items-center justify-center rounded-full outline-none transition-transform focus-visible:ring-2 focus-visible:ring-[#c4b5fd] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+            "relative z-10 flex items-center justify-center rounded-full outline-none transition-transform focus-visible:ring-2 focus-visible:ring-[#c4b5fd] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+            isCompact ? "h-28 w-28" : "h-44 w-44 md:h-52 md:w-52",
             orbActive && "scale-[1.02] animate-pulse"
           )}
           style={{
@@ -235,31 +270,54 @@ export function JarvisVoiceAssistant() {
           }}
           aria-label={phase === "recording" ? "Stop recording and send" : "Start voice recording"}
         >
-          <span className="flex gap-3" aria-hidden>
-            <span className="h-8 w-2 rounded-full bg-white/95 shadow-[0_0_12px_rgba(255,255,255,0.5)]" />
-            <span className="h-8 w-2 rounded-full bg-white/95 shadow-[0_0_12px_rgba(255,255,255,0.5)]" />
+          <span className={cn("flex", isCompact ? "gap-2" : "gap-3")} aria-hidden>
+            <span
+              className={cn(
+                "rounded-full bg-white/95 shadow-[0_0_12px_rgba(255,255,255,0.5)]",
+                isCompact ? "h-6 w-1.5" : "h-8 w-2"
+              )}
+            />
+            <span
+              className={cn(
+                "rounded-full bg-white/95 shadow-[0_0_12px_rgba(255,255,255,0.5)]",
+                isCompact ? "h-6 w-1.5" : "h-8 w-2"
+              )}
+            />
           </span>
           {phase === "uploading" && (
             <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
-              <Loader2 className="h-10 w-10 text-white animate-spin" />
+              <Loader2 className={cn("text-white animate-spin", isCompact ? "h-8 w-8" : "h-10 w-10")} />
             </span>
           )}
         </button>
 
-        <p className="mt-4 text-xs text-white/40 font-sans max-w-[14rem]">
+        <p
+          className={cn(
+            "mt-4 text-white/40 font-sans max-w-[14rem]",
+            isCompact ? "text-[10px] leading-snug" : "text-xs"
+          )}
+        >
           {phase === "recording" ? "Tap again to send" : "Tap the orb — allow the mic when asked"}
         </p>
 
         <button
           type="button"
           onClick={() => setChatOpen((o) => !o)}
-          className="mt-6 text-xs font-sans text-[#a78bfa] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4b5fd] rounded"
+          className={cn(
+            "mt-6 font-sans text-[#a78bfa] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4b5fd] rounded",
+            isCompact ? "mt-4 text-[10px]" : "mt-6 text-xs"
+          )}
         >
           Talk to Jarvis in chat
         </button>
 
         {chatOpen && (
-          <div className="mt-4 w-full max-w-md text-left space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div
+            className={cn(
+              "mt-4 w-full text-left space-y-2 animate-in fade-in slide-in-from-top-2 duration-200",
+              isCompact ? "max-w-full" : "max-w-md"
+            )}
+          >
             <Textarea
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
@@ -290,9 +348,14 @@ export function JarvisVoiceAssistant() {
         )}
       </div>
 
-      <p className="mt-12 flex items-center justify-center gap-2 text-[10px] text-white/30 font-sans max-w-sm leading-relaxed">
-        <Mic className="h-3 w-3 shrink-0 opacity-60" />
-        Voice is processed by your n8n workflow (ElevenLabs stays on the server). No API keys in this page.
+      <p
+        className={cn(
+          "flex items-center justify-center gap-2 text-white/30 font-sans leading-relaxed",
+          isCompact ? "mt-6 text-[9px] max-w-full" : "mt-12 text-[10px] max-w-sm"
+        )}
+      >
+        <Mic className={cn("shrink-0 opacity-60", isCompact ? "h-2.5 w-2.5" : "h-3 w-3")} />
+        Voice goes through your n8n workflow. No API keys in the browser.
       </p>
     </div>
   );
