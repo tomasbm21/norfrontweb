@@ -1,6 +1,6 @@
 /** Spoken + on-screen greeting (keep in sync with TTS). */
 export const JARVIS_GREETING_TEXT =
-  "Hello! I'm Jarvis. Tap the orb to speak, or use chat below.";
+  "Hello! I'm your Madrid Tourist Guide. Tap the orb to start a live voice chat.";
 
 let lastAudio: HTMLAudioElement | null = null;
 

@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Corner launcher for the home page: opens a compact Jarvis panel and greets the user by voice when opened.
+ * Corner launcher for the home page: opens a compact Madrid Tourist Guide panel and greets the user by voice when opened.
  */
 export function FloatingJarvis() {
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export function FloatingJarvis() {
   return (
     <div
       className="fixed bottom-5 right-5 z-[200] flex flex-col items-end gap-3 pointer-events-none [&_button]:pointer-events-auto [&_a]:pointer-events-auto"
-      aria-label="Jarvis voice assistant"
+      aria-label="Madrid Tourist Guide voice assistant"
     >
       {open && (
         <div
@@ -44,17 +44,17 @@ export function FloatingJarvis() {
             "animate-in fade-in slide-in-from-bottom-4 duration-200"
           )}
           role="dialog"
-          aria-label="AI Voice Assistant"
+          aria-label="Madrid Tourist Guide voice assistant"
         >
           <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-black/90 px-3 py-2.5 backdrop-blur-sm">
             <span className="font-mono text-xs font-semibold tracking-tight text-white/90">
-              Jarvis
+              Madrid Tourist Guide
             </span>
             <button
               type="button"
               onClick={close}
               className="rounded-lg p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4b5fd]"
-              aria-label="Close Jarvis"
+              aria-label="Close Madrid Tourist Guide"
             >
               <X className="h-4 w-4" />
             </button>
@@ -78,9 +78,8 @@ export function FloatingJarvis() {
           boxShadow:
             "inset -6px -8px 16px rgba(0,0,0,0.5), inset 4px 4px 12px rgba(255,255,255,0.06), 0 4px 24px rgba(124,58,237,0.35)",
         }}
-        aria-expanded={open}
         aria-controls="jarvis-floating-panel"
-        title={open ? "Minimize Jarvis" : "Open Jarvis"}
+        title={open ? "Minimize Madrid Tourist Guide" : "Open Madrid Tourist Guide"}
       >
         <span className="flex gap-1.5" aria-hidden>
           <span className="h-5 w-1.5 rounded-full bg-white/95 shadow-[0_0_8px_rgba(255,255,255,0.45)]" />

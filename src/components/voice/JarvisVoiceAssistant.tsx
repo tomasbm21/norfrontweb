@@ -1,18 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  createVoiceRecorder,
-  getVoiceWebhookUrl,
-  handleAgentResponse,
-  sendTextToAgent,
-  sendVoiceToAgent,
-} from "@/lib/voiceAgent";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+  ConversationProvider,
+  useConversation,
+  type ConversationStatus,
+} from "@elevenlabs/react";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Loader2, Mic, Send } from "lucide-react";
+import { Loader2, Mic, MicOff, Volume2 } from "lucide-react";
 
-type Phase = "idle" | "mic_prompt" | "recording" | "uploading" | "playing";
+const MADRID_TOURIST_GUIDE_AGENT_ID = "agent_2801krxdcm28e16t8xwhh6enk065";
 
 export interface JarvisVoiceAssistantProps {
   /** Full /jarvis page vs floating widget */
@@ -23,188 +19,119 @@ export interface JarvisVoiceAssistantProps {
 
 export function JarvisVoiceAssistant({
   variant = "page",
-  initialBubbleText = "Hello!",
+  initialBubbleText = "Hello! I'm your Madrid Tourist Guide. Tap the orb to start a live voice chat.",
+}: JarvisVoiceAssistantProps) {
+  return (
+    <ConversationProvider>
+      <MadridTouristGuideAssistant variant={variant} initialBubbleText={initialBubbleText} />
+    </ConversationProvider>
+  );
+}
+
+function MadridTouristGuideAssistant({
+  variant = "page",
+  initialBubbleText = "Hello! I'm your Madrid Tourist Guide. Tap the orb to start a live voice chat.",
 }: JarvisVoiceAssistantProps) {
   const { toast } = useToast();
-  const webhookUrl = getVoiceWebhookUrl();
-  const [phase, setPhase] = useState<Phase>("idle");
   const [bubbleText, setBubbleText] = useState(initialBubbleText);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const streamRef = useRef<MediaStream | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const mimeRef = useRef<string>("audio/webm");
+  const [lastStatus, setLastStatus] = useState<ConversationStatus>("disconnected");
 
-  const stopStream = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-  }, []);
+  const conversation = useConversation({
+    onConnect: () => {
+      setBubbleText("Connected. Ask me what to see, eat, or do in Madrid.");
+      toast({ title: "Madrid Tourist Guide connected" });
+    },
+    onDisconnect: () => {
+      setBubbleText(initialBubbleText);
+    },
+    onError: (message) => {
+      setBubbleText("I could not connect. Please try again.");
+      toast({
+        title: "Voice assistant error",
+        description: message || "Could not connect to ElevenLabs.",
+        variant: "destructive",
+      });
+    },
+    onModeChange: ({ mode }) => {
+      setBubbleText(mode === "speaking" ? "Sharing a Madrid recommendation..." : "Listening...");
+    },
+    volume: 0.9,
+  });
 
-  useEffect(() => () => stopStream(), [stopStream]);
+  useEffect(() => {
+    if (conversation.status === lastStatus) return;
+    setLastStatus(conversation.status);
+    if (conversation.status === "connecting") {
+      setBubbleText("Connecting to your Madrid Tourist Guide...");
+    }
+  }, [conversation.status, lastStatus]);
 
-  const ensureMic = useCallback(async () => {
+  const { endSession } = conversation;
+
+  useEffect(() => () => endSession(), [endSession]);
+
+  const isCompact = variant === "compact";
+  const isConnecting = conversation.status === "connecting";
+  const isConnected = conversation.status === "connected";
+  const isUnavailable = conversation.status === "error";
+  const orbActive = isConnected || isConnecting;
+
+  const helperText = useMemo(() => {
+    if (isConnecting) return "Connecting over ElevenLabs WebRTC...";
+    if (conversation.isSpeaking) return "Agent is speaking";
+    if (conversation.isListening) return "Agent is listening";
+    if (isConnected) return "Tap again to end the live voice session";
+    if (isUnavailable) return "Connection failed. Tap to retry.";
+    return "Tap the orb — allow the mic when asked";
+  }, [
+    conversation.isListening,
+    conversation.isSpeaking,
+    isConnected,
+    isConnecting,
+    isUnavailable,
+  ]);
+
+  const startConversation = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       toast({
         title: "Microphone not supported",
         description: "Use a modern browser over HTTPS (or localhost).",
         variant: "destructive",
       });
-      return null;
+      return;
     }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      return stream;
+      stream.getTracks().forEach((track) => track.stop());
+      conversation.startSession({
+        agentId: MADRID_TOURIST_GUIDE_AGENT_ID,
+        connectionType: "webrtc",
+      });
     } catch {
+      setBubbleText("Microphone access is needed before we can talk.");
       toast({
         title: "Microphone access denied",
         description: "Allow microphone access in your browser settings to use voice.",
         variant: "destructive",
       });
-      return null;
     }
-  }, [toast]);
-
-  const startRecording = useCallback(async () => {
-    if (!webhookUrl) {
-      toast({
-        title: "Voice agent not configured",
-        description: "Set VITE_N8N_VOICE_WEBHOOK_URL to your n8n webhook URL.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setPhase("mic_prompt");
-    const stream = await ensureMic();
-    if (!stream) {
-      setPhase("idle");
-      return;
-    }
-    const { recorder, mimeType } = createVoiceRecorder(stream);
-    mimeRef.current = mimeType;
-    chunksRef.current = [];
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
-    recorder.onerror = () => {
-      setPhase("idle");
-      toast({ title: "Recording error", variant: "destructive" });
-    };
-    recorder.start(120);
-    recorderRef.current = recorder;
-    setPhase("recording");
-    setBubbleText("Listening…");
-  }, [ensureMic, toast, webhookUrl]);
-
-  const stopRecordingAndSend = useCallback(async () => {
-    const recorder = recorderRef.current;
-    if (!recorder || recorder.state === "inactive") {
-      setPhase("idle");
-      return;
-    }
-    if (!webhookUrl) return;
-
-    setPhase("uploading");
-    setBubbleText("Thinking…");
-
-    await new Promise<void>((resolve) => {
-      recorder.onstop = () => resolve();
-      recorder.stop();
-    });
-    stopStream();
-    recorderRef.current = null;
-
-    const blob = new Blob(chunksRef.current, { type: mimeRef.current });
-    chunksRef.current = [];
-
-    if (blob.size < 64) {
-      toast({ title: "Nothing recorded", description: "Hold the orb a little longer." });
-      setPhase("idle");
-      setBubbleText(initialBubbleText);
-      return;
-    }
-
-    try {
-      const res = await sendVoiceToAgent(webhookUrl, blob, mimeRef.current);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      setPhase("playing");
-      try {
-        const { text, playedAudio } = await handleAgentResponse(res);
-        if (text) setBubbleText(text);
-        else if (playedAudio) setBubbleText("…");
-        else setBubbleText("Got it.");
-      } catch {
-        toast({
-          title: "Could not play reply",
-          description: "The response may not be audio or JSON. Adjust your n8n Respond node.",
-          variant: "destructive",
-        });
-      }
-    } catch {
-      setBubbleText("Try again?");
-      toast({
-        title: "Voice request failed",
-        description: "Check n8n workflow, CORS, and webhook URL.",
-        variant: "destructive",
-      });
-    } finally {
-      setPhase("idle");
-    }
-  }, [stopStream, toast, webhookUrl, initialBubbleText]);
+  }, [conversation, toast]);
 
   const toggleOrb = useCallback(() => {
-    if (phase === "uploading" || phase === "playing") return;
-    if (phase === "recording") {
-      void stopRecordingAndSend();
+    if (isConnecting) return;
+    if (isConnected) {
+      conversation.endSession();
       return;
     }
-    void startRecording();
-  }, [phase, startRecording, stopRecordingAndSend]);
+    void startConversation();
+  }, [conversation, isConnected, isConnecting, startConversation]);
 
-  const sendChat = useCallback(async () => {
-    const msg = chatInput.trim();
-    if (!msg || !webhookUrl) {
-      if (!webhookUrl) {
-        toast({
-          title: "Chat not configured",
-          description: "Set VITE_N8N_VOICE_WEBHOOK_URL for the same n8n workflow.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-    setPhase("uploading");
-    try {
-      const res = await sendTextToAgent(webhookUrl, msg);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      try {
-        const { text, playedAudio } = await handleAgentResponse(res);
-        if (text) setBubbleText(text);
-        else if (playedAudio) setBubbleText("…");
-      } catch {
-        toast({
-          title: "Could not handle reply",
-          description: "Adjust n8n response format (JSON with replyText / audio).",
-          variant: "destructive",
-        });
-      }
-      setChatInput("");
-    } catch {
-      toast({
-        title: "Chat request failed",
-        description: "Check n8n workflow and CORS on the webhook.",
-        variant: "destructive",
-      });
-    } finally {
-      setPhase("idle");
-    }
-  }, [chatInput, toast, webhookUrl]);
-
-  const isCompact = variant === "compact";
-  const orbActive = phase === "recording" || phase === "uploading" || phase === "playing";
+  const statusLabel = isConnected
+    ? conversation.isSpeaking
+      ? "speaking"
+      : "listening"
+    : conversation.status;
 
   return (
     <div
@@ -224,7 +151,7 @@ export function JarvisVoiceAssistant({
             isCompact ? "px-4 py-2 text-sm" : "px-6 py-3 text-base md:text-lg"
           )}
         >
-          <span className="text-[#c4b5fd]">AI</span> Voice Assistant
+          <span className="text-[#c4b5fd]">Madrid</span> Tourist Guide
         </div>
         <div className="absolute right-4 top-[calc(100%-2px)] flex flex-col items-end pointer-events-none">
           <div className="w-0 h-0 mr-7 border-x-[8px] border-x-transparent border-b-[10px] border-b-white" aria-hidden />
@@ -256,7 +183,7 @@ export function JarvisVoiceAssistant({
         <button
           type="button"
           onClick={toggleOrb}
-          disabled={phase === "uploading" || phase === "playing"}
+          disabled={isConnecting}
           className={cn(
             "relative z-10 flex items-center justify-center rounded-full outline-none transition-transform focus-visible:ring-2 focus-visible:ring-[#c4b5fd] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
             isCompact ? "h-28 w-28" : "h-44 w-44 md:h-52 md:w-52",
@@ -268,7 +195,7 @@ export function JarvisVoiceAssistant({
             boxShadow:
               "inset -12px -16px 32px rgba(0,0,0,0.65), inset 8px 10px 24px rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.12)",
           }}
-          aria-label={phase === "recording" ? "Stop recording and send" : "Start voice recording"}
+          aria-label={isConnected ? "End Madrid Tourist Guide session" : "Start Madrid Tourist Guide session"}
         >
           <span className={cn("flex", isCompact ? "gap-2" : "gap-3")} aria-hidden>
             <span
@@ -284,9 +211,19 @@ export function JarvisVoiceAssistant({
               )}
             />
           </span>
-          {phase === "uploading" && (
+          {isConnecting && (
             <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
               <Loader2 className={cn("text-white animate-spin", isCompact ? "h-8 w-8" : "h-10 w-10")} />
+            </span>
+          )}
+          {isConnected && (
+            <span className="absolute bottom-5 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[10px] font-medium text-white/80">
+              {conversation.isSpeaking ? (
+                <Volume2 className="h-3 w-3" />
+              ) : (
+                <Mic className="h-3 w-3" />
+              )}
+              {statusLabel}
             </span>
           )}
         </button>
@@ -297,54 +234,21 @@ export function JarvisVoiceAssistant({
             isCompact ? "text-[10px] leading-snug" : "text-xs"
           )}
         >
-          {phase === "recording" ? "Tap again to send" : "Tap the orb — allow the mic when asked"}
+          {helperText}
         </p>
 
-        <button
-          type="button"
-          onClick={() => setChatOpen((o) => !o)}
-          className={cn(
-            "mt-6 font-sans text-[#a78bfa] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4b5fd] rounded",
-            isCompact ? "mt-4 text-[10px]" : "mt-6 text-xs"
-          )}
-        >
-          Talk to Jarvis in chat
-        </button>
-
-        {chatOpen && (
-          <div
+        {isConnected && (
+          <button
+            type="button"
+            onClick={() => conversation.setMuted(!conversation.isMuted)}
             className={cn(
-              "mt-4 w-full text-left space-y-2 animate-in fade-in slide-in-from-top-2 duration-200",
-              isCompact ? "max-w-full" : "max-w-md"
+              "mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-sans text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4b5fd]",
+              isCompact ? "text-[10px]" : "text-xs"
             )}
           >
-            <Textarea
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Type a message for Jarvis…"
-              className="min-h-[88px] bg-white/5 border-white/20 text-white placeholder:text-white/35 resize-none font-sans text-sm"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void sendChat();
-                }
-              }}
-            />
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void sendChat()}
-              disabled={phase === "uploading" || !chatInput.trim()}
-              className="w-full gap-2 bg-white/10 hover:bg-white/15 text-white border border-white/20"
-            >
-              {phase === "uploading" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-              Send to agent
-            </Button>
-          </div>
+            {conversation.isMuted ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+            {conversation.isMuted ? "Unmute mic" : "Mute mic"}
+          </button>
         )}
       </div>
 
@@ -355,7 +259,7 @@ export function JarvisVoiceAssistant({
         )}
       >
         <Mic className={cn("shrink-0 opacity-60", isCompact ? "h-2.5 w-2.5" : "h-3 w-3")} />
-        Voice goes through your n8n workflow. No API keys in the browser.
+        Live voice runs through ElevenLabs WebRTC. No API keys in the browser.
       </p>
     </div>
   );
