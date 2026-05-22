@@ -20,7 +20,7 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import Jobs from "./pages/Jobs";
 import Partners from "./pages/Partners";
-import Jarvis from "./pages/Jarvis";
+
 
 const queryClient = new QueryClient();
 
@@ -40,7 +40,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/partners" element={<Partners />} />
-          <Route path="/jarvis" element={<Jarvis />} />
+
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
