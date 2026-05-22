@@ -8,7 +8,7 @@ import { Home, Briefcase, FolderKanban, Award, Users, Handshake, Mic } from "luc
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Our Model", href: "/model", icon: Briefcase },
-  { name: "Madrid Guide", href: "/jarvis", icon: Mic },
+  { name: "Voice Agent", href: "/jarvis", icon: Mic },
   { name: "Case Studies", href: "/case-studies", icon: FolderKanban },
   { name: "How We Work", href: "/services", icon: Award },
   { name: "Portfolio", href: "/partners", icon: Handshake },
