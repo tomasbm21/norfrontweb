@@ -2,16 +2,7 @@ import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import CardSwap, { Card } from "@/components/CardSwap";
-import {
-  Package,
-  TrendingDown,
-  Truck,
-  BarChart3,
-  ArrowRight,
-  Boxes,
-  Route,
-  AlertTriangle,
-} from "lucide-react";
+import { ArrowRight, AlertTriangle, Truck } from "lucide-react";
 
 /* ─── Tradara accent colour ─── */
 const ACCENT = "#D97706";
@@ -74,10 +65,9 @@ function AmbientAurora({ className = "" }: { className?: string }) {
       const cy2 = h * (0.6 + Math.sin(t * 0.3) * 0.1);
       glow(cx2, cy2, w * 0.6, "rgb(30, 35, 55)", 0.14);
 
-      // Warm amber glow for Tradara hero
       const cx3 = w * 0.5;
-      const cy3 = h * (0.25 + Math.sin(t * 0.2) * 0.06);
-      glow(cx3, cy3, w * 0.45, "rgb(80, 55, 20)", 0.08);
+      const cy3 = h * (0.35 + Math.sin(t * 0.2) * 0.08);
+      glow(cx3, cy3, w * 0.5, "rgb(50, 48, 65)", 0.1);
 
       const drawBand = (
         by: number,
@@ -162,117 +152,7 @@ function AmbientAurora({ className = "" }: { className?: string }) {
   );
 }
 
-/* ─── Shipment exception ticker (CSS-only scroll) ─── */
-const exceptions = [
-  { id: "SHP-29847", type: "Customs Hold", dest: "Frankfurt", status: "At Risk", eta: "+48h" },
-  { id: "SHP-44102", type: "Driver No-Show", dest: "Rotterdam", status: "Breached", eta: "+72h" },
-  { id: "SHP-51830", type: "Port Congestion", dest: "Hamburg", status: "At Risk", eta: "+24h" },
-  { id: "SHP-38219", type: "Carrier Delay", dest: "Milan", status: "Within Window", eta: "+12h" },
-  { id: "SHP-62044", type: "Documentation", dest: "Antwerp", status: "At Risk", eta: "+36h" },
-  { id: "SHP-17593", type: "Weather Hold", dest: "Le Havre", status: "Breached", eta: "+96h" },
-  { id: "SHP-80211", type: "Customs Hold", dest: "Barcelona", status: "At Risk", eta: "+30h" },
-  { id: "SHP-45902", type: "Carrier Delay", dest: "Felixstowe", status: "Within Window", eta: "+8h" },
-];
-
-function ExceptionTicker() {
-  const statusColor = (s: string) => {
-    if (s === "Breached") return "text-red-400 bg-red-500/10 border-red-500/20";
-    if (s === "At Risk") return "text-amber-400 bg-amber-500/10 border-amber-500/20";
-    return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
-  };
-
-  // Double the list for seamless CSS loop
-  const doubled = [...exceptions, ...exceptions];
-
-  return (
-    <div className="relative overflow-hidden rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.06]">
-        <AlertTriangle size={13} style={{ color: ACCENT }} />
-        <span className="font-mono text-[11px] tracking-wider uppercase" style={{ color: ACCENT }}>
-          Live Exception Feed
-        </span>
-        <span className="ml-auto flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          <span className="font-mono text-[10px] text-white/30">{exceptions.length} active</span>
-        </span>
-      </div>
-
-      {/* Scrolling rows */}
-      <div className="h-[280px] overflow-hidden">
-        <div
-          className="flex flex-col"
-          style={{ animation: "ticker-scroll 28s linear infinite" }}
-        >
-          {doubled.map((ex, i) => (
-            <div
-              key={`${ex.id}-${i}`}
-              className="flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] shrink-0"
-            >
-              <span className="font-mono text-xs text-white/60 w-[90px]">{ex.id}</span>
-              <span className="text-xs text-white/40 w-[110px] truncate">{ex.type}</span>
-              <span className="text-xs text-white/30 w-[80px] truncate">{ex.dest}</span>
-              <span className={`text-[10px] font-mono tracking-wide px-2 py-0.5 rounded-full border ${statusColor(ex.status)}`}>
-                {ex.status}
-              </span>
-              <span className="ml-auto font-mono text-xs text-white/30">{ex.eta}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Tradara problem cards ─── */
-const problems = [
-  {
-    icon: TrendingDown,
-    title: "Demand Forecasting Gaps",
-    desc: "Planning teams rely on last year's numbers plus manual adjustments. Forecast accuracy sits at 60–70%. Stockouts and overstock follow.",
-  },
-  {
-    icon: Boxes,
-    title: "Inventory Imbalance",
-    desc: "Too much stock in some locations, too little in others. Manual rebalancing is reactive, not proactive.",
-  },
-  {
-    icon: Package,
-    title: "Supplier Blind Spots",
-    desc: "On-time delivery, quality metrics, and lead time variability are tracked after the fact, not monitored in real time.",
-  },
-  {
-    icon: Route,
-    title: "Shipment Exception Chaos",
-    desc: "Delayed shipments, carrier issues, and customs holds are managed through email chains. No single view of what's at risk.",
-  },
-];
-
-/* ─── Tradara solution modules ─── */
-const solutions = [
-  {
-    label: "SHP-29847 → CUSTOMS HOLD",
-    title: "Demand Sensing & Forecast Enhancement",
-    desc: "AI-augmented demand signals from sales data, market indicators, and historical patterns. Improve forecast accuracy by 15–25%.",
-  },
-  {
-    label: "INV: 3 LOCATIONS IMBALANCED",
-    title: "Inventory Optimization & Rebalancing",
-    desc: "Automated safety stock calculations, reorder point optimization, and multi-location rebalancing recommendations.",
-  },
-  {
-    label: "OTD: 87% → TARGET 95%",
-    title: "Supplier Performance Monitoring",
-    desc: "Real-time tracking of OTD, quality, lead time, and cost variance. Auto-alerts for trending issues before they become crises.",
-  },
-  {
-    label: "DELAY: +48H | SLA: AT RISK",
-    title: "Shipment Exception Management",
-    desc: "Centralized view of in-transit shipments, exception detection, and automated stakeholder notifications.",
-  },
-];
-
-/* ─── Other portfolio brands ─── */
+/* ─── All 9 portfolio brands (Tradara included) ─── */
 const companies = [
   {
     name: "Pulsara",
@@ -310,6 +190,13 @@ const companies = [
       "Contract analysis, clause extraction, and document review. Regulatory monitoring and KYC/AML compliance automation.",
   },
   {
+    name: "Tradara",
+    vertical: "Logistics & Supply Chain",
+    status: "In Development",
+    description:
+      "Demand sensing, inventory optimization, supplier performance monitoring, and shipment exception management. Built for teams managing 50+ suppliers and multi-warehouse operations.",
+  },
+  {
     name: "Onvara",
     vertical: "HR / People Operations",
     status: "Designed",
@@ -332,200 +219,138 @@ const companies = [
   },
 ];
 
-/* ─── How It Works steps ─── */
-const steps = [
-  {
-    num: "01",
-    title: "Connect",
-    desc: "We integrate with your ERP and TMS (SAP, Oracle, project44) on day one.",
-    timing: "< 300ms",
-  },
-  {
-    num: "02",
-    title: "Configure",
-    desc: "We map your demand signals, supplier scoring rules, and exception thresholds with your planning team.",
-    timing: "< 1.2s",
-  },
-  {
-    num: "03",
-    title: "Deploy",
-    desc: "Exceptions surface automatically. Forecasts update daily. Your team makes decisions on current data, not last week's.",
-    timing: "< 2s",
-  },
+/* ─── Tradara exception data for ticker ─── */
+const exceptions = [
+  { id: "SHP-29847", type: "Customs Hold", dest: "Frankfurt", status: "At Risk", eta: "+48h" },
+  { id: "SHP-44102", type: "Driver No-Show", dest: "Rotterdam", status: "Breached", eta: "+72h" },
+  { id: "SHP-51830", type: "Port Congestion", dest: "Hamburg", status: "At Risk", eta: "+24h" },
+  { id: "SHP-38219", type: "Carrier Delay", dest: "Milan", status: "Within Window", eta: "+12h" },
+  { id: "SHP-62044", type: "Documentation", dest: "Antwerp", status: "At Risk", eta: "+36h" },
+  { id: "SHP-17593", type: "Weather Hold", dest: "Le Havre", status: "Breached", eta: "+96h" },
 ];
+
+function ExceptionTicker() {
+  const statusColor = (s: string) => {
+    if (s === "Breached") return "text-red-400 bg-red-500/10 border-red-500/20";
+    if (s === "At Risk") return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+    return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+  };
+
+  const doubled = [...exceptions, ...exceptions];
+
+  return (
+    <div className="relative overflow-hidden rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06]">
+        <AlertTriangle size={12} style={{ color: ACCENT }} />
+        <span className="font-mono text-[10px] tracking-wider uppercase" style={{ color: ACCENT }}>
+          Live Exception Feed
+        </span>
+        <span className="ml-auto flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="font-mono text-[10px] text-white/30">{exceptions.length} active</span>
+        </span>
+      </div>
+      <div className="h-[180px] overflow-hidden">
+        <div
+          className="flex flex-col"
+          style={{ animation: "ticker-scroll 24s linear infinite" }}
+        >
+          {doubled.map((ex, i) => (
+            <div
+              key={`${ex.id}-${i}`}
+              className="flex items-center gap-3 px-4 py-2 border-b border-white/[0.04] shrink-0"
+            >
+              <span className="font-mono text-[11px] text-white/60 w-[85px]">{ex.id}</span>
+              <span className="text-[11px] text-white/40 w-[100px] truncate">{ex.type}</span>
+              <span className="text-[11px] text-white/30 w-[70px] truncate">{ex.dest}</span>
+              <span className={`text-[10px] font-mono tracking-wide px-2 py-0.5 rounded-full border ${statusColor(ex.status)}`}>
+                {ex.status}
+              </span>
+              <span className="ml-auto font-mono text-[11px] text-white/30">{ex.eta}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Partners() {
   return (
     <Layout>
       {/* ════════════════════════════════════════════════════════
-          HERO — Tradara Logistics Vertical
+          UPDATE — Tradara Logistics (compact highlight)
          ════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen pt-32 pb-24 overflow-hidden">
+      <section className="relative pt-32 pb-16 overflow-hidden">
         <AmbientAurora />
 
-        {/* Ghost geometry */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: 320,
-              height: 320,
-              top: "8%",
-              left: "-6%",
-              border: "1px solid rgba(100, 105, 140, 0.12)",
-              animation: "float-slow 18s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: 180,
-              height: 180,
-              top: "55%",
-              right: "-3%",
-              border: "1px solid rgba(90, 95, 130, 0.1)",
-              animation: "float-slow 14s ease-in-out infinite reverse",
-            }}
-          />
-        </div>
-
         <div className="relative z-10 container mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
-            {/* Left — hero copy */}
-            <div className="lg:col-span-5">
-              <div className="sticky top-32">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-px" style={{ background: ACCENT }} />
-                  <span
-                    className="text-[11px] font-mono font-semibold tracking-[0.18em] uppercase"
-                    style={{ color: ACCENT }}
-                  >
+          {/* Eyebrow */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-px" style={{ background: ACCENT }} />
+            <span
+              className="text-[11px] font-mono font-semibold tracking-[0.18em] uppercase"
+              style={{ color: ACCENT }}
+            >
+              Latest Update
+            </span>
+          </div>
+
+          {/* Compact Tradara highlight card */}
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              {/* Left — copy */}
+              <div className="p-8 lg:p-10 flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-4">
+                  <Truck size={18} style={{ color: ACCENT }} />
+                  <span className="font-mono text-[11px] tracking-wider uppercase" style={{ color: ACCENT }}>
                     Tradara — Logistics &amp; Supply Chain
                   </span>
                 </div>
-
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight mb-6 text-foreground">
+                <h2 className="text-2xl sm:text-3xl font-medium tracking-tight mb-3 text-foreground">
                   Your supply chain outgrew its spreadsheets.
-                </h1>
-
-                <p className="text-base text-muted-foreground leading-relaxed mb-4">
-                  Tradara automates demand sensing, inventory optimization, supplier performance tracking, and shipment exception management. One workflow live in 4 weeks.
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                  Tradara automates demand sensing, inventory optimization, supplier performance tracking, and shipment exception management. One workflow live in 4 weeks. Works inside SAP, Oracle, and NetSuite.
                 </p>
 
-                <p className="text-base text-muted-foreground leading-relaxed mb-8">
-                  Built for supply chain teams managing 50+ suppliers and multi-warehouse operations. Works inside your existing ERP — SAP, Oracle, NetSuite — with no new platform.
-                </p>
-
-                <div className="flex flex-wrap gap-3 mb-10">
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-md transition-colors"
-                    style={{ background: ACCENT }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#C06A05")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = ACCENT)
-                    }
-                  >
-                    Start with supplier monitoring
-                    <ArrowRight size={15} />
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-muted-foreground border border-foreground/10 rounded-md hover:text-foreground hover:border-foreground/20 transition-colors"
-                  >
-                    Calculate forecast ROI
-                  </Link>
-                </div>
-
-                {/* Metrics — 2×2 dashboard grid */}
-                <div className="pt-8 border-t border-foreground/10">
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { value: "15–25%", label: "Forecast Accuracy Improvement", badge: "Demand Sensing" },
-                      { value: "40%", label: "Less Exception Mgmt Time", badge: "Shipment Ops" },
-                      { value: "4 weeks", label: "Time to First Workflow", badge: "Deployment" },
-                      { value: "50+", label: "Suppliers per Deployment", badge: "Scale" },
-                    ].map((m) => (
-                      <div
-                        key={m.label}
-                        className="p-3 rounded-lg border border-white/[0.06] bg-white/[0.02]"
-                      >
-                        <span
-                          className="text-[10px] font-mono font-medium tracking-wide px-2 py-0.5 rounded-full mb-2 inline-block"
-                          style={{
-                            background: ACCENT_DIM,
-                            color: ACCENT,
-                          }}
-                        >
-                          {m.badge}
-                        </span>
-                        <span className="text-xl font-semibold text-foreground block mb-0.5">
-                          {m.value}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {m.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right — exception ticker + integrations */}
-            <div className="lg:col-span-7">
-              <div className="flex flex-col gap-6">
-                <ExceptionTicker />
-
-                {/* Integration logos strip */}
-                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
-                  <span className="font-mono text-[10px] tracking-wider uppercase text-white/30 block mb-3">
-                    Integrations
-                  </span>
-                  <div className="flex flex-wrap gap-x-6 gap-y-2">
-                    {[
-                      "SAP",
-                      "Oracle",
-                      "NetSuite",
-                      "project44",
-                      "Blue Yonder",
-                      "FourKites",
-                      "Power BI",
-                      "Snowflake",
-                    ].map((name) => (
-                      <span
-                        key={name}
-                        className="text-xs font-mono text-white/40"
-                      >
-                        {name}
+                {/* Metrics row */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {[
+                    { value: "15–25%", label: "Forecast Accuracy" },
+                    { value: "40%", label: "Less Exception Time" },
+                    { value: "4 weeks", label: "To First Workflow" },
+                  ].map((m) => (
+                    <div key={m.label}>
+                      <span className="text-lg font-semibold text-foreground block" style={{ color: ACCENT }}>
+                        {m.value}
                       </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Problem cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  {problems.map((p) => (
-                    <div
-                      key={p.title}
-                      className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4"
-                    >
-                      <p.icon
-                        size={18}
-                        className="mb-2"
-                        style={{ color: ACCENT }}
-                      />
-                      <h3 className="text-sm font-medium text-white mb-1">
-                        {p.title}
-                      </h3>
-                      <p className="text-xs text-white/50 leading-relaxed">
-                        {p.desc}
-                      </p>
+                      <span className="text-[11px] text-muted-foreground">{m.label}</span>
                     </div>
                   ))}
                 </div>
+
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-md transition-colors w-fit"
+                  style={{ background: ACCENT }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#C06A05")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = ACCENT)
+                  }
+                >
+                  Learn more about Tradara
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
+
+              {/* Right — exception ticker */}
+              <div className="p-8 lg:p-10 flex items-center">
+                <div className="w-full">
+                  <ExceptionTicker />
+                </div>
               </div>
             </div>
           </div>
@@ -533,114 +358,25 @@ export default function Partners() {
       </section>
 
       {/* ════════════════════════════════════════════════════════
-          SOLUTION MODULES
+          PORTFOLIO — All 9 Subsidiaries
          ════════════════════════════════════════════════════════ */}
       <section className="relative py-20 border-t border-foreground/10">
-        <div className="container mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-px" style={{ background: ACCENT }} />
-            <span
-              className="text-[11px] font-mono font-semibold tracking-[0.18em] uppercase"
-              style={{ color: ACCENT }}
-            >
-              Solution Modules
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-medium tracking-tight mb-10 text-foreground">
-            Four workflows. One platform.
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {solutions.map((s) => (
-              <div
-                key={s.title}
-                className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-5 flex flex-col gap-3"
-              >
-                <span className="font-mono text-[10px] tracking-wider text-white/30">
-                  {s.label}
-                </span>
-                <h3 className="text-base font-medium text-white">{s.title}</h3>
-                <p className="text-sm text-white/50 leading-relaxed flex-1">
-                  {s.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          HOW IT WORKS
-         ════════════════════════════════════════════════════════ */}
-      <section className="relative py-20 border-t border-foreground/10">
-        <div className="container mx-auto px-5 sm:px-6 lg:px-8 max-w-4xl">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-px" style={{ background: ACCENT }} />
-            <span
-              className="text-[11px] font-mono font-semibold tracking-[0.18em] uppercase"
-              style={{ color: ACCENT }}
-            >
-              How It Works
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-medium tracking-tight mb-10 text-foreground">
-            Live in 4 weeks.
-          </h2>
-
-          <div className="flex flex-col gap-5">
-            {steps.map((s) => (
-              <div
-                key={s.num}
-                className="flex items-start gap-5 rounded-lg border border-white/[0.06] bg-white/[0.02] p-5"
-              >
-                <span
-                  className="text-2xl font-light shrink-0"
-                  style={{ color: ACCENT }}
-                >
-                  {s.num}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-base font-medium text-white">
-                      {s.title}
-                    </h3>
-                    <span
-                      className="font-mono text-[10px] tracking-wide px-2 py-0.5 rounded-full ml-auto"
-                      style={{ background: ACCENT_DIM, color: ACCENT }}
-                    >
-                      {s.timing}
-                    </span>
-                  </div>
-                  <p className="text-sm text-white/50 leading-relaxed">
-                    {s.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          FULL PORTFOLIO — Other Brands
-         ════════════════════════════════════════════════════════ */}
-      <section className="relative py-20 border-t border-foreground/10">
-        <div className="container mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="relative z-10 container mx-auto px-5 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-            {/* Left — summary */}
+            {/* Left — static info */}
             <div className="lg:col-span-5">
               <div className="sticky top-32">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-px bg-foreground/20" />
                   <span className="text-[11px] font-mono font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-                    Full Portfolio
+                    Portfolio
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-medium tracking-tight mb-4 text-foreground">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight mb-6 text-foreground">
                   9 Brands. 9 Verticals.
-                </h2>
+                </h1>
                 <p className="text-base text-muted-foreground leading-relaxed mb-4">
-                  Each Norfront brand targets a specific enterprise workflow bottleneck. Shared engineering and deployment infrastructure means each new vertical launches faster than the last.
+                  Each Norfront brand targets a specific enterprise workflow bottleneck. Shared engineering and deployment infrastructure across brands means each new vertical launches faster than the last.
                 </p>
                 <p className="text-base text-muted-foreground leading-relaxed mb-8">
                   Pulsara and Propera are live. Audera has a proven reference engagement. The remaining brands are designed, branded, and ready for first deployments.
@@ -648,43 +384,27 @@ export default function Partners() {
                 <div className="pt-8 border-t border-foreground/10">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <span className="text-2xl font-semibold text-foreground block mb-1">
-                        2
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Brands Live
-                      </span>
+                      <span className="text-2xl font-semibold text-foreground block mb-1">2</span>
+                      <span className="text-sm text-muted-foreground">Brands Live</span>
                     </div>
                     <div>
-                      <span className="text-2xl font-semibold text-foreground block mb-1">
-                        7
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Designed &amp; Ready
-                      </span>
+                      <span className="text-2xl font-semibold text-foreground block mb-1">7</span>
+                      <span className="text-sm text-muted-foreground">Designed &amp; Ready</span>
                     </div>
                     <div>
-                      <span className="text-2xl font-semibold text-foreground block mb-1">
-                        4 weeks
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Deployment Cycle
-                      </span>
+                      <span className="text-2xl font-semibold text-foreground block mb-1">4 weeks</span>
+                      <span className="text-sm text-muted-foreground">Deployment Cycle</span>
                     </div>
                     <div>
-                      <span className="text-2xl font-semibold text-foreground block mb-1">
-                        9
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Vertical Brands
-                      </span>
+                      <span className="text-2xl font-semibold text-foreground block mb-1">9</span>
+                      <span className="text-sm text-muted-foreground">Vertical Brands</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right — CardSwap */}
+            {/* Right — CardSwap component */}
             <div className="lg:col-span-7">
               <div className="relative h-[600px] lg:h-[700px]">
                 <CardSwap
@@ -701,20 +421,23 @@ export default function Partners() {
                             <h3 className="text-2xl font-semibold text-white">
                               {company.name}
                             </h3>
-                            <span
-                              className={`text-[10px] font-mono tracking-[0.12em] uppercase px-2 py-0.5 ${
-                                company.status.includes("Live") ||
-                                company.status === "In Production"
-                                  ? "text-[#7ec8e3]/80 border border-[#7ec8e3]/20 bg-[#7ec8e3]/5"
-                                  : "text-white/40 border border-white/10 bg-white/[0.03]"
-                              }`}
+                            <span className={`text-[10px] font-mono tracking-[0.12em] uppercase px-2 py-0.5 ${
+                              company.status.includes("Live") || company.status === "In Production"
+                                ? "text-[#7ec8e3]/80 border border-[#7ec8e3]/20 bg-[#7ec8e3]/5"
+                                : company.status === "In Development"
+                                ? "border"
+                                : "text-white/40 border border-white/10 bg-white/[0.03]"
+                            }`}
+                            style={
+                              company.status === "In Development"
+                                ? { color: ACCENT, borderColor: `${ACCENT}33`, background: ACCENT_DIM }
+                                : undefined
+                            }
                             >
                               {company.status}
                             </span>
                           </div>
-                          <span className="text-[11px] font-mono tracking-[0.08em] text-white/40 block mb-3">
-                            {company.vertical}
-                          </span>
+                          <span className="text-[11px] font-mono tracking-[0.08em] text-white/40 block mb-3">{company.vertical}</span>
                           <p className="text-base text-white/70 leading-relaxed">
                             {company.description}
                           </p>
@@ -731,34 +454,6 @@ export default function Partners() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          FINAL CTA
-         ════════════════════════════════════════════════════════ */}
-      <section className="relative py-20 border-t border-foreground/10">
-        <div className="container mx-auto px-5 sm:px-6 lg:px-8 max-w-3xl text-center">
-          <h2 className="text-2xl sm:text-3xl font-medium tracking-tight mb-4 text-foreground">
-            Your next stockout is still preventable.
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed mb-8">
-            Works inside your existing ERP and TMS. No new platform, no disruption to current operations.
-          </p>
-          <Link
-            to="/contact"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white rounded-md transition-colors"
-            style={{ background: ACCENT }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "#C06A05")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = ACCENT)
-            }
-          >
-            Start with supplier monitoring
-            <ArrowRight size={15} />
-          </Link>
         </div>
       </section>
 
