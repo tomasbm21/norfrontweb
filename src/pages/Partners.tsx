@@ -314,22 +314,6 @@ export default function Partners() {
                   Tradara automates demand sensing, inventory optimization, supplier performance tracking, and shipment exception management. One workflow live in 4 weeks. Works inside SAP, Oracle, and NetSuite.
                 </p>
 
-                {/* Metrics row */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  {[
-                    { value: "15–25%", label: "Forecast Accuracy" },
-                    { value: "40%", label: "Less Exception Time" },
-                    { value: "4 weeks", label: "To First Workflow" },
-                  ].map((m) => (
-                    <div key={m.label}>
-                      <span className="text-lg font-semibold text-foreground block" style={{ color: ACCENT }}>
-                        {m.value}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">{m.label}</span>
-                    </div>
-                  ))}
-                </div>
-
                 <Link
                   to="/contact"
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-md transition-colors w-fit"
